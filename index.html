@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
   <meta charset="UTF-8" />
@@ -99,29 +99,116 @@
   background-color: #ff0000; /* 悬停时变红，醒目提示 */
   z-index: 10;
 }
-/* Logo 墙布局样式 */
+/* 侧边导航栏样式 - 移动端折叠 (小于 2500px) */
+@media (max-width: 2499px) {
+  .side-nav-content {
+    position: fixed;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255, 255, 255, 0.95);
+    backdrop-filter: blur(10px);
+    padding: 16px;
+    border-radius: 12px 0 0 12px;
+    box-shadow: -2px 0 10px rgba(0,0,0,0.1);
+    z-index: 50;
+    transition: transform 0.3s ease-out;
+  }
+
+  .side-nav-content.collapsed {
+    transform: translate(calc(100% + 20px), -50%);
+  }
+
+  .side-nav-toggle {
+    position: fixed;
+    right: 0;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 28px;
+    height: 56px;
+    background: white;
+    border: 1px solid rgba(0, 0, 0, 0.1);
+    border-right: none;
+    border-radius: 14px 0 0 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    z-index: 51;
+    transition: all 0.3s ease;
+    box-shadow: -2px 0 8px rgba(0,0,0,0.08);
+  }
+
+  .side-nav-toggle:hover {
+    background: #f5f5f5;
+    width: 32px;
+  }
+
+  /* 展开时按钮固定在屏幕右边缘 */
+  .side-nav-toggle.side-nav-toggle-open {
+    right: 0;
+    transform: translateY(-50%);
+    border-radius: 14px 0 0 14px;
+    z-index: 52;
+  }
+}
+
+/* 侧边导航栏样式 - 桌面端始终显示 (2500px 及以上) */
+@media (min-width: 2500px) {
+  .side-nav-toggle {
+    display: none !important;
+  }
+
+  .side-nav-content {
+    position: fixed;
+    right: 15rem;
+    top: 50%;
+    transform: translate(0, -50%) !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+  }
+
+  /* 外层容器位置 */
+  [x-ref="sideNavContainer"] {
+    right: 15rem !important;
+  }
+}
 .logo-grid {
   display: flex;
   flex-wrap: wrap;
-  gap: 40px; /* Logo 之间的间距 */
+  gap: 20px; /* Logo 之间的间距 */
   justify-content: center;
   align-items: center;
   max-width: 100%;
 }
 
-.logo-item {
-  width: 140px; /* 单个 Logo 的宽度 */
-  height: 140px; /* 单个 Logo 的高度 */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #fff;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
-  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  overflow: hidden;
-  position: relative;
+@media (min-width: 768px) {
+  .logo-grid {
+    gap: 40px; /* Logo 之间的间距 */
+  }
 }
+
+    .logo-item {
+      width: 100px;
+      height: 100px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+      transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+      overflow: hidden;
+      position: relative;
+    }
+
+    @media (min-width: 768px) {
+      .logo-item {
+        width: 140px;
+        height: 140px;
+      }
+    }
 
 /* 随机旋转效果 - 让 Logo 看起来不那么死板 */
 .logo-item:nth-child(1) { transform: rotate(-3deg); }
@@ -152,7 +239,7 @@
 
   <!-- 顶部导航 -->
   <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
-    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+    <div class="max-w-6xl mx-auto px-4 md:px-6 h-16 md:h-20 flex items-center justify-between">
       <h1 class="text-xl font-bold tracking-wide" style="font-family: 'STXihei', '华文细黑', sans-serif;">Kaye<span class="uppercase">LIANG</span></h1>
       <span x-data="{
         sections: ['hero', 'AD23', 'CW06', 'AD22', 'AD21', 'AD20', 'AD19', 'AD18', 'AD17', 'AD16', 'CW05', 'AD15', 'AD13'],
@@ -181,14 +268,14 @@
           this.sections.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el); });
         }
       }" class="absolute left-1/2 -translate-x-1/2" style="font-family: 'Caveat', 'ZCOOL XiaoWei', cursive; color: #1a5f4a;">
-        <span x-text="displayLabel" class="text-5xl transition-opacity duration-300 ease-out" :class="fading ? 'opacity-0' : 'opacity-100'"></span>
+        <span x-text="displayLabel" class="text-3xl md:text-5xl transition-opacity duration-300 ease-out" :class="fading ? 'opacity-0' : 'opacity-100'"></span>
       </span>
       <span class="text-xl font-bold tracking-wide" style="font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;">梁凯轶</span>
     </div>
   </header>
 
   <!-- 固定宽度容器 -->
-  <div class="min-w-[1280px]">
+  <div class="min-w-0 md:min-w-[1280px]">
 
 
 
@@ -197,7 +284,7 @@
 
 
   <!-- 主体内容区域 -->
-<main class="pt-32 pb-20 px-6 space-y-32 max-w-6xl mx-auto">
+<main class="pt-24 md:pt-32 pb-20 px-4 md:px-6 space-y-16 md:space-y-32 max-w-6xl mx-auto">
 
 
 
@@ -1556,6 +1643,7 @@
   sections: ['hero', 'AD23', 'CW06', 'AD22', 'AD21', 'AD20', 'AD19', 'AD18', 'AD17', 'AD16', 'CW05', 'AD15', 'AD13'],
   current: 'hero',
   ratios: {},
+  isOpen: false,
   init() {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
@@ -1588,130 +1676,148 @@
       el.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
   }
-}" class="fixed right-60 top-1/2 -translate-y-1/2 z-50 flex flex-col items-end space-y-6" style="pointer-events: none;">
+}" class="fixed top-1/2 -translate-y-1/2 z-50" style="pointer-events: none; right: 20px;" x-ref="sideNavContainer">
+
+  <!-- 导航内容区域 -->
+  <div class="side-nav-content flex flex-col items-end space-y-4 md:space-y-6"
+       :class="isOpen ? '' : 'collapsed'"
+       style="pointer-events: auto;">
 
   <!-- 导航项：个人简介 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'hero' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('hero')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'hero' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'hero' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>ABOUT</div>
-      <div>个人简介</div>
+      <div class="hidden md:block">个人简介</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'hero' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'hero' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：AD23 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD23' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD23')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD23' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD23' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>AD23</div>
-      <div>In Their Eyes</div>
+      <div class="hidden md:block">In Their Eyes</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD23' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD23' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：CW06 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'CW06' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('CW06')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'CW06' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'CW06' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>CW06</div>
-      <div>山海の間</div>
+      <div class="hidden md:block">山海の間</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'CW06' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'CW06' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：AD22 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD22' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD22')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD22' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD22' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>AD22</div>
-      <div>City Ends, Nature Begins.</div>
+      <div class="hidden md:block">City Ends, Nature Begins.</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD22' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD22' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：AD21 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD21' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD21')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD21' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD21' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>AD21</div>
-      <div>Journey to the Sea</div>
+      <div class="hidden md:block">Journey to the Sea</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD21' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD21' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：AD20 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD20' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD20')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD20' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD20' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>AD20</div>
-      <div>Crossing Bustle 2.0</div>
+      <div class="hidden md:block">Crossing Bustle 2.0</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD20' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD20' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：AD19 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD19' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD19')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD19' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD19' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>AD19</div>
-      <div>Childhood in Neighborhood</div>
+      <div class="hidden md:block">Childhood in Neighborhood</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD19' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD19' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：AD18 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD18' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD18')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD18' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD18' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>AD18</div>
-      <div>Corridor Pavilion 回廊亭</div>
+      <div class="hidden md:block">Corridor Pavilion 回廊亭</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD18' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD18' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：AD17 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD17' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD17')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD17' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD17' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>AD17</div>
-      <div>CONNECTION</div>
+      <div class="hidden md:block">CONNECTION</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD17' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD17' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：AD16 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD16' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD16')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD16' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD16' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>AD16</div>
-      <div>Tranquil Vitality 平热日常</div>
+      <div class="hidden md:block">Tranquil Vitality 平热日常</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD16' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD16' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：CW05 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'CW05' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('CW05')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'CW05' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'CW05' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>CW05</div>
-      <div>Bylake</div>
+      <div class="hidden md:block">Bylake</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'CW05' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'CW05' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：AD15 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD15' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD15')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD15' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD15' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>AD15</div>
-      <div>BREATH</div>
+      <div class="hidden md:block">BREATH</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD15' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD15' ? 'scale-130' : ''"></div>
   </div>
 
   <!-- 导航项：AD13 -->
   <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD13' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD13')">
-    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD13' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+    <div class="text-right text-[8px] md:text-[10px] font-mono mr-2 md:mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD13' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
       <div>AD13</div>
-      <div>How Silos Encore?</div>
+      <div class="hidden md:block">How Silos Encore?</div>
     </div>
-    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD13' ? 'scale-130' : ''"></div>
+    <div class="w-1.5 h-1.5 md:w-2 md:h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD13' ? 'scale-130' : ''"></div>
   </div>
+
+  </div>
+
+  <!-- 白色半圆按钮 - 移动端展开后依然显示，箭头方向切换 -->
+  <button
+    @click="isOpen = !isOpen"
+    class="side-nav-toggle pointer-events-auto"
+    :class="isOpen ? 'side-nav-toggle-open' : ''">
+    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-4 h-4 text-black">
+      <path x-show="!isOpen" stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+      <path x-show="isOpen" stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+    </svg>
+  </button>
 
 </div>
 
     <!-- ================== 页脚代码开始 ================== -->
     <footer class="bg-[#f4f4f4] border-t border-gray-200 mt-20">
-      <div class="max-w-6xl mx-auto px-6 py-16">
+      <div class="max-w-6xl mx-auto px-4 md:px-6 py-12 md:py-16">
         <!-- 版权信息 -->
         <p class="text-xs text-gray-500 tracking-wide mb-8">
           &copy; 2026 Kaye Liang. All Rights Reserved.
