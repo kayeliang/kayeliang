@@ -1,0 +1,1746 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Kaye Liang</title>
+  <!-- 标签栏图标 (Favicon) -->
+  <link rel="icon" type="image/x-icon" href="logo.ico">
+  <!-- 引入 Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 引入 Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Caveat:wght@400;700&family=ZCOOL+XiaoWei&display=swap" rel="stylesheet">
+  <!-- 引入 Alpine.js 用于轮播交互 -->
+  <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"></script>
+  <style>
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #fcfcfc;
+      color: #111;
+    }
+    /* 隐藏滚动条 (如果需要) */
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+    /* 自定义滚动行为 */
+    html {
+      scroll-behavior: smooth;
+    }
+    /* 确保图片容器的宽高比 */
+    .aspect-ratio {
+      position: relative;
+      width: 100%;
+    }
+    .aspect-ratio-content {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+/* 自定义项目描述段落样式 */
+.max-w-3xl.mx-auto.mt-12.prose.prose-sm p {
+  margin-bottom: 2rem; /* 增大段落底部间距，约等于2倍行高 */
+  line-height: 2;      /* 设置行间距为2 */
+}
+
+/* 地图容器样式 */
+.map-container {
+  position: relative;
+  width: 100%;
+  height: 0;
+  padding-bottom: 56.25%; /* 16:9 宽高比 */
+  overflow: hidden;
+  background-color: #f0f0f0;
+  border-radius: 0.5rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+}
+
+.map-background {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('https://img.zcool.cn/community/01d5705d8f8b89a801217f443346d7.jpg@1280w_1l_2o_100sh.jpg'); /* 世界地图背景图 */
+  background-size: cover;
+  background-position: center;
+  filter: grayscale(100%) brightness(95%);
+  transition: all 0.5s ease;
+}
+
+.map-container:hover .map-background {
+  filter: grayscale(0%) brightness(100%);
+}
+
+.map-pin {
+  position: absolute;
+  width: 12px;
+  height: 12px;
+  background-color: #000;
+  border: 2px solid #fff;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+  transform: translate(-50%, -50%);
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.map-pin:hover {
+  width: 16px;
+  height: 16px;
+  background-color: #ff0000; /* 悬停时变红，醒目提示 */
+  z-index: 10;
+}
+/* Logo 墙布局样式 */
+.logo-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px; /* Logo 之间的间距 */
+  justify-content: center;
+  align-items: center;
+  max-width: 100%;
+}
+
+.logo-item {
+  width: 140px; /* 单个 Logo 的宽度 */
+  height: 140px; /* 单个 Logo 的高度 */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+  transition: all 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  overflow: hidden;
+  position: relative;
+}
+
+/* 随机旋转效果 - 让 Logo 看起来不那么死板 */
+.logo-item:nth-child(1) { transform: rotate(-3deg); }
+.logo-item:nth-child(2) { transform: rotate(2deg); }
+.logo-item:nth-child(3) { transform: rotate(-1deg); }
+
+/* 鼠标悬停效果：回正 + 放大 + 阴影加深 */
+.logo-item:hover {
+  transform: rotate(0deg) scale(1.05);
+  box-shadow: 0 12px 24px rgba(0,0,0,0.1);
+  z-index: 10;
+}
+
+/* Logo 图片样式：默认黑白，悬停变彩色 */
+.logo-img {
+  width: 80%;
+  height: auto;
+  filter: grayscale(100%); /* 默认黑白 */
+  transition: filter 0.4s ease;
+}
+
+.logo-item:hover .logo-img {
+  filter: grayscale(0%); /* 悬停变彩色 */
+}
+  </style>
+</head>
+<body class="antialiased selection:bg-black selection:text-white overflow-x-auto" x-data="{ open: false }">
+
+  <!-- 顶部导航 -->
+  <header class="fixed top-0 w-full z-50 bg-white/80 backdrop-blur-md border-b border-gray-100 transition-all duration-300">
+    <div class="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
+      <h1 class="text-xl font-bold tracking-wide" style="font-family: 'STXihei', '华文细黑', sans-serif;">Kaye<span class="uppercase">LIANG</span></h1>
+      <span x-data="{
+        sections: ['hero', 'AD23', 'CW06', 'AD22', 'AD21', 'AD20', 'AD19', 'AD18', 'AD17', 'AD16', 'CW05', 'AD15', 'AD13'],
+        labels: { hero: 'Hello !', AD23: 'In Their Eyes', CW06: 'Between', AD22: 'City Ends, Nature Begins.', AD21: 'Journey to the Sea', AD20: 'Crossing Bustle 2.0', AD19: 'Childhood in Neighborhood', AD18: 'Corridor Pavilion', AD17: 'CONNECTION', AD16: 'Tranquil Vitality', CW05: 'Bylake', AD15: 'BREATH', AD13: 'How Silos Encore?' },
+        current: 'hero',
+        previous: 'hero',
+        displayLabel: 'Hello !',
+        fading: false,
+        ratios: {},
+        init() {
+          const self = this;
+          const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => { self.ratios[entry.target.id] = entry.intersectionRatio; });
+            let maxRatio = 0, maxId = 'hero';
+            self.sections.forEach(id => { if (self.ratios[id] && self.ratios[id] > maxRatio) { maxRatio = self.ratios[id]; maxId = id; } });
+            if (maxId !== self.current) {
+              self.previous = self.current;
+              self.fading = true;
+              setTimeout(() => {
+                self.current = maxId;
+                self.displayLabel = self.labels[maxId] || 'Hello !';
+                self.fading = false;
+              }, 300);
+            }
+          }, { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] });
+          this.sections.forEach(id => { const el = document.getElementById(id); if (el) observer.observe(el); });
+        }
+      }" class="absolute left-1/2 -translate-x-1/2" style="font-family: 'Caveat', 'ZCOOL XiaoWei', cursive; color: #1a5f4a;">
+        <span x-text="displayLabel" class="text-5xl transition-opacity duration-300 ease-out" :class="fading ? 'opacity-0' : 'opacity-100'"></span>
+      </span>
+      <span class="text-xl font-bold tracking-wide" style="font-family: 'Microsoft YaHei', '微软雅黑', sans-serif;">梁凯轶</span>
+    </div>
+  </header>
+
+  <!-- 固定宽度容器 -->
+  <div class="min-w-[1280px]">
+
+
+
+
+  
+
+
+  <!-- 主体内容区域 -->
+<main class="pt-32 pb-20 px-6 space-y-32 max-w-6xl mx-auto">
+
+
+
+
+
+
+
+
+
+<!-- ================== 个人信息板块开始 ================== -->
+
+<!-- 1. 个人名片 (Hero) -->
+<section id="hero" class="scroll-mt-20 py-10">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+    <!-- 左侧：文字 -->
+    <div class="lg:col-span-5 lg:col-start-1 flex flex-col gap-6 order-1">
+      <div>
+        <h1 class="text-4xl font-bold mb-2 tracking-tight text-neutral-900">梁凯轶</h1>
+        <p class="text-lg text-neutral-500 font-light tracking-wide">
+          建筑师 · 摄影师 · 内容创作者
+        </p>
+      </div>
+      <p class="text-neutral-700 leading-relaxed">
+        我热衷于探索人与空间的互动，无论是通过砖石构建实体，还是通过镜头捕捉光影。从重庆到米兰与斯德哥尔摩，我致力于在理性逻辑与感性审美之间寻找平衡。
+      </p>
+      <div class="flex gap-4 text-sm text-neutral-600 pt-2">
+        <a href="mailto:liangkaye@163.com" class="hover:text-black underline underline-offset-4">邮箱联系</a>
+        <span class="text-neutral-300">|</span>
+        <span>重庆 / 现居</span>
+      </div>
+    </div>
+    <!-- 右侧：图片 (建议放一张你的摄影作品) -->
+    <div class="lg:col-span-7 lg:col-start-6 relative group aspect-[4/3] overflow-hidden order-2">
+      <!-- 替换下方的 src 为你的摄影作品链接 -->
+      <img src="characteristic.jpg" alt="Visual Observer" class="object-cover w-full h-full transform transition duration-700 group-hover:scale-105">
+    </div>
+  </div>
+</section>
+
+<!-- 2. 教育 (Education) -->
+<section class="scroll-mt-20 py-10">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    <!-- 左侧：文字 -->
+    <div class="lg:col-span-5 lg:col-start-1 flex flex-col gap-8 order-1">
+      <div>
+        <h2 class="text-2xl font-bold mb-6 text-neutral-900 border-b border-neutral-200 pb-2">教育背景</h2>
+        
+         <!-- 学校 1 -->
+        <div class="mb-6">
+          <h3 class="text-lg font-bold text-neutral-800">意大利米兰理工大学 (Polimi)</h3>
+          <p class="text-neutral-600 text-sm mb-1">建筑环境管理 硕士 2026-2028</p>
+          <p class="text-xs text-neutral-500">MSc. Management of Built Environment 2026-2028</p>
+        </div>
+
+        <!-- 学校 3 -->
+        <div class="mb-6">
+          <h3 class="text-lg font-bold text-neutral-800">重庆大学</h3>
+          <p class="text-neutral-600 text-sm">建筑学 学士 2021-2026</p>
+        </div>
+      </div>
+    </div>
+    <!-- 右侧：图片 (建议放一张拼贴图：重庆+米兰+斯德哥尔摩) -->
+    <div class="lg:col-span-7 lg:col-start-6 relative group aspect-[4/3] overflow-hidden order-2">
+      <!-- 替换下方的 src 为你的教育背景拼贴图 -->
+      <img src="back.jpg" alt="Global Vision" class="object-cover w-full h-full transform transition duration-700 group-hover:scale-105">
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+<!-- ================== 经历与高光 (Experience & Awards) ================== -->
+<section class="scroll-mt-20 py-10" id="experience">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    <!-- 左侧：文字 (保持不动) -->
+    <div class="lg:col-span-5 lg:col-start-1 flex flex-col gap-8 order-1">
+      <!-- 实习经历 -->
+      <div>
+        <h2 class="text-2xl font-bold mb-6 text-neutral-900 border-b border-neutral-200 pb-2">实践经历</h2>
+        <div class="space-y-6">
+          <div>
+            <h3 class="text-base font-bold text-neutral-800">CLAB合造社</h3>
+            <p class="text-neutral-600 text-sm">2025.10 - 2026.01 建筑实习生</p>
+            <p class="text-xs text-neutral-500 mt-1">日本NOT A HOTEL竞赛、伊宁市超级石榴商业策划</p>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-neutral-800">IDO元象建筑</h3>
+            <p class="text-neutral-600 text-sm">2024.03 - 05 建筑实习生</p>
+            <p class="text-xs text-neutral-500 mt-1">宜宾高新区三中(中标)、万科观音桥实验住宅</p>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-neutral-800">gad绿城设计</h3>
+            <p class="text-neutral-600 text-sm">2024.07 - 08 建筑实习生</p>
+            <p class="text-xs text-neutral-500 mt-1">成都饮马川温泉酒店、珠海城市之心</p>
+          </div>
+        </div>
+      </div>
+      
+      <!-- 荣誉奖项 -->
+      <div>
+        <h2 class="text-2xl font-bold mb-4 text-neutral-900 border-b border-neutral-200 pb-2">荣誉奖项</h2>
+        <ul class="space-y-2 text-sm text-neutral-700">
+          <li class="flex gap-2">
+            <span class="font-bold text-neutral-900">2024</span>
+            <span>中国人居环境设计学年奖  银奖</span>
+          </li>
+          <li class="flex gap-2">
+            <span class="font-bold text-neutral-900">2024</span>
+            <span>重庆市风景园林学会竞赛  一等奖</span>
+          </li>
+          <li class="flex gap-2">
+            <span class="font-bold text-neutral-900">2022</span>
+            <span>重庆大学建造季  一等奖</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+   <!-- 右侧：Logo 墙 (带官网跳转) -->
+<div class="lg:col-span-7 lg:col-start-6 order-2">
+  <div class="bg-neutral-50 p-8 rounded-sm border border-neutral-100 min-h-[300px] flex items-center justify-center">
+    <div class="logo-grid">
+      
+      <!-- Logo 1: CLAB (已添加跳转链接) -->
+      <a href="https://www.clabarchitects.com/" target="_blank" rel="noopener" class="logo-link">
+        <div class="logo-item">
+          <img src="clab.png" alt="CLAB" class="logo-img">
+        </div>
+      </a>
+      
+      <!-- Logo 2: IDO (已添加跳转链接) -->
+      <a href="https://www.ido-design.com/" target="_blank" rel="noopener" class="logo-link">
+        <div class="logo-item">
+          <img src="ido.png" alt="IDO" class="logo-img">
+        </div>
+      </a>
+      
+      <!-- Logo 3: gad (已添加跳转链接) -->
+      <a href="http://www.gad.com.cn/" target="_blank" rel="noopener" class="logo-link">
+        <div class="logo-item">
+          <img src="gad.png" alt="gad" class="logo-img">
+        </div>
+      </a>
+
+    </div>
+  </div>
+</div>
+</section>
+
+<!-- ================== 个人信息板块结束 ================== -->
+
+
+
+
+
+
+
+
+
+
+
+<!-- ================== 项目分布地图 ================== -->
+<section class="py-10 scroll-mt-20">
+  <div class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    <!-- 左侧：文字说明 -->
+    <div class="lg:col-span-5 lg:col-start-1 flex flex-col gap-6 order-1">
+      <div>
+        <h2 class="text-2xl font-bold mb-2 text-neutral-900">项目地图</h2>
+        <p class="text-neutral-600 text-sm leading-relaxed">
+          从重庆的山城巷弄，到北欧的冰川与日本的离岛。
+          这些黑点标记了我的思考与实践在地球表面的坐标。
+        </p>
+      </div>
+      
+      <!-- 项目列表 (点击可跳转) -->
+      <div class="space-y-3 text-sm">
+        <a href="#AD18" class="block group">
+          <span class="inline-block w-2 h-2 bg-black rounded-full mr-2 group-hover:scale-130 transition-transform"></span>
+          AD18 - 重庆沙坪坝
+        </a>
+        <a href="#AD19" class="block group">
+          <span class="inline-block w-2 h-2 bg-black rounded-full mr-2 group-hover:scale-130 transition-transform"></span>
+          AD19 - 重庆沙坪坝
+        </a>
+        <a href="#AD20" class="block group">
+          <span class="inline-block w-2 h-2 bg-black rounded-full mr-2 group-hover:scale-130 transition-transform"></span>
+          AD20 - 重庆渝中区
+        </a>
+        <a href="#AD21" class="block group">
+          <span class="inline-block w-2 h-2 bg-black rounded-full mr-2 group-hover:scale-130 transition-transform"></span>
+          AD21 - 日本长崎
+        </a>
+        <a href="#AD22" class="block group">
+          <span class="inline-block w-2 h-2 bg-black rounded-full mr-2 group-hover:scale-130 transition-transform"></span>
+          AD22 - 冰岛东部区都皮沃古尔
+        </a>
+        <a href="#CW06" class="block group">
+          <span class="inline-block w-2 h-2 bg-black rounded-full mr-2 group-hover:scale-130 transition-transform"></span>
+          CW06 - 日本屋久岛
+        </a>
+      </div>
+    </div>
+
+    <!-- 右侧：静态交互地图 -->
+    <div class="lg:col-span-7 lg:col-start-6 order-2">
+      <!-- 地图容器 -->
+      <div class="map-container">
+        <div class="map-background"></div>
+        
+        <!-- 重庆 (Chongqing) - AD18, AD19, AD20 -->
+        <!-- 使用绝对定位，left和top数值是根据背景图比例调整的 -->
+        <div class="map-pin" style="left: 38%; top: 55%;" 
+             onclick="document.getElementById('AD18').scrollIntoView({behavior: 'smooth'})"
+             title="重庆社区回廊亭 & 幼儿园"></div>
+        
+        <!-- 日本 (Japan) - AD21, CW06 -->
+        <div class="map-pin" style="left: 58%; top: 42%;" 
+             onclick="document.getElementById('AD21').scrollIntoView({behavior: 'smooth'})"
+             title="日本长崎 & 屋久岛"></div>
+        
+        <!-- 冰岛 (Iceland) - AD22 -->
+        <div class="map-pin" style="left: 15%; top: 10%;" 
+             onclick="document.getElementById('AD22').scrollIntoView({behavior: 'smooth'})"
+             title="冰岛湿地观鸟点"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ================== AD23 ================== -->
+<section id="AD23" class="scroll-mt-20">
+  <div x-data="{
+    images: [
+      'AD23-0.png', 'AD23-1.jpg', 'AD23-2.jpg', 'AD23-3.jpg', 'AD23-4.jpg',
+      'AD23-5.jpg', 'AD23-6.png', 'AD23-7.jpg', 'AD23-8.jpg', 'AD23-9.jpg'
+    ],
+    current: 0
+  }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+
+    <!-- 图片轮播模块 (左侧) -->
+    <div class="lg:col-span-7 relative group aspect-[4/3] overflow-hidden order-1 lg:order-1">
+      <template x-for="(img, index) in images" :key="index">
+        <img
+          :src="img"
+          x-show="current === index"
+          x-transition:enter="transition ease-out duration-500"
+          x-transition:enter-start="opacity-0 transform scale-105"
+          x-transition:enter-end="opacity-100 transform scale-100"
+          class="absolute inset-0 w-full h-full object-contain"
+          alt="Project Image"
+        >
+      </template>
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1"
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1"
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+      </button>
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+
+    <!-- 文字介绍 (右侧) -->
+    <div class="lg:col-span-5 flex flex-col gap-6 order-2 lg:order-2">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">AD23</span>
+        <h2 class="text-3xl font-bold tracking-tight">In Their Eyes</h2>
+      </div>
+
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">天津三岔河口混龄健康社区</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2026.03-05</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">中国天津市红桥区三岔河口</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">居住、办公、城市设计</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">54210㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">容积率</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">1.3</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">绿地率</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">40%</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶，张博宣，王政焯</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 项目描述 -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>
+    本项目"In Their Eyes"是大健康建筑多校联合毕业设计，由梁凯轶、张博宣、王政焯三位同学共同完成。选取位于天津市三岔河口区域，基地位于红桥区和河北区交界处，海河、北运河和南运河在此交汇，整个城市的形态自河口孕育、生长、成型，独特的地理位置造就了基地复杂、多元的城市空间景观。  </p>
+  <p>
+    传统养老院往往只将老人视为需要被隔离照护的客体，忽视了老年人作为"活生生的人"的其他需求。本设计通过视线场景的引导设计，构建一个让老人感受到安全平等、有归属感的、氛围和睦的适老混龄社区。核心理念可归纳为三个关键词：<strong>共同聚焦</strong>（与社区人群共同聚焦）、<strong>余光守护</strong>（余光感知到彼此存在）、<strong>社区焦点网络</strong>（居委会、活动室、阅览室、社区市场均设于此，全年老年人皆可在此阅读、社交）。  </p>
+  <p>
+    基于视线场景模型，我们析出老年人的心理需求：平等感（面对面平视交流）、参与感（与社区人群共同聚焦）、安全感（看见熟悉的人或事物）、陪伴（余光感知到彼此存在）、承担社会责任（老年人依然能承担社区长辈的角色）、自我价值实现（老人的成就或能力得到认可）。  </p>
+  <p>
+    总体规划包含八大功能组团：河畔商业、老年公寓、创意聚落、社区公园、活力运动、社区医院、静养院落、社区中心，通过"社区焦点网络"将各功能有机联合。房型设计方面，共设计了8种房型，其中老人房型5种（含失能老人病房），青年公寓3种。  </p>
+  <p>
+    创新特色体现在三个方面：<strong>视线导向设计</strong>——以"视线"作为人与空间的核心媒介，通过建筑布局和房型设计创造自发的视线交流；<strong>混龄社区模式</strong>——打破传统养老院的隔离模式，创造代际共融的生活场景；<strong>适老化产业嵌入</strong>——配置适老化产品开发空间、养老院样板间和混居公寓，形成可持续的社区运营模式。  </p>
+</div>
+<!-- ================== AD13 ================== -->
+
+
+
+<section id="CW06" class="scroll-mt-20">
+  <div x-data="{ 
+    images: [ 
+      'CW06-1.jpg', 
+      'CW06-2.jpg', 
+      'CW06-3.jpg', 
+      'CW06-4.jpg', 
+      'CW06-5.jpg', 
+      'CW06-6.jpg', 
+      'CW06-7.jpg', 
+      'CW06-8.jpg', 
+      'CW06-9.jpg'
+    ], 
+    current: 0 
+  }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    
+    <!-- 文字介绍 (左侧) -->
+    <div class="lg:col-span-5 lg:col-start-1 flex flex-col gap-6 order-2 lg:order-1">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">CW06</span>
+        <h2 class="text-3xl font-bold tracking-tight">山海の間</h2>
+      </div>
+
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">NOT A HOTEL 屋久岛酒店设计</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2025.11-12</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">日本屋久岛尾之间 Onoaida, Yakushima, Japan</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">居住、酒店、住宅</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">285㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶，徐浪，李健，丁博潮</p>
+        </div>
+      </div>
+    </div> <!-- 修正：关闭文字介绍 Div -->
+
+    <!-- 图片轮播模块 (右侧) -->
+    <div class="lg:col-span-7 lg:col-start-6 relative group aspect-[4/3] overflow-hidden order-1 lg:order-2">
+      <!-- 图片容器 -->
+      <template x-for="(img, index) in images" :key="index">
+        <img 
+          :src="img" 
+          x-show="current === index"
+          x-transition:enter="transition ease-out duration-500"
+          x-transition:enter-start="opacity-0 transform scale-105"
+          x-transition:enter-end="opacity-100 transform scale-100"
+          class="absolute inset-0 w-full h-full object-contain"
+          alt="Project Image"
+        >
+      </template>
+
+      <!-- 左右翻页按钮 -->
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1" 
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1" 
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+      </button>
+
+      <!-- 图片计数 -->
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+  </div> <!-- 修正：关闭 Grid 容器 Div -->
+</section> <!-- 修正：关闭 Section -->
+
+<!-- 项目描述 -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>该项目充分利用场地的自然景观优势，旨在为长期居住的客人提供了一种非凡的居住体验。酒店南面广阔无垠的太平洋，北靠高耸的山峰，享有双重景观。建筑顺应缓坡地形，低矮地嵌入树林之中。以当地可持续木材和暖色调混凝土作为主要材料，这些材料能够随时间风化并与森林色调融为一体。整个建筑遵循“居住于自然之中”的准则，让景观穿过建筑，成为日常生活的一部分。</p>
+  
+  <p>从停车场出发，沿着一段楼梯向上即可到达位于二层的建筑入口，并直接进入被森林环绕三面的公共起居空间。客厅朝西，面向一个用于日常户外活动和放松的草坪与灌木庭院。从客厅向上几步，客人便来到客房平台，朝北的公共阳台立即呈现出高耸山峰的壮丽景色。继续前行，厨房、餐厅和茶室占据了东侧的空间，而客房则位于南侧，其视野越过树梢，可欣赏到广阔的海景。</p>
+  
+  <p>建筑主体被抬离地面，为温泉和桑拿让出整个底层空间。每个房间内的旋转楼梯直接将客人带到南翼的私人浴室；每个浴缸都面向郁郁葱葱的亚热带森林。北侧两个公共浴池面向不同的景观。格状分布的浴池如同水田一般躺在建筑下方，室内外融为一体，沐浴者能够放松身心，充分感受原始森林的自然之美。</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- ================== AD23 ================== -->
+<!-- 1. 修复了 class= 语法，并添加 scroll-mt-20 -->
+
+
+
+<section id="AD22" class="scroll-mt-20">
+  <div x-data="{ images: [ 'AD22-1.jpg', 'AD22-2.jpg', 'AD22-3.jpg' ], current: 0 }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    <!-- 图片轮播模块 (左侧) -->
+    <div class="lg:col-span-7 relative group aspect-[4/3] overflow-hidden order-1 lg:order-1">
+      <template x-for="(img, index) in images" :key="index">
+        <img :src="img" x-show="current === index" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 transform scale-105" x-transition:enter-end="opacity-100 transform scale-100" class="absolute inset-0 w-full h-full object-contain" alt="Project Image">
+      </template>
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+    <!-- 文字介绍 (右侧) -->
+    <div class="lg:col-span-5 flex flex-col gap-6 order-2 lg:order-2">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">AD22</span>
+        <h2 class="text-3xl font-bold tracking-tight">City Ends, Nature Begins.</h2>
+      </div>
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">湿地观鸟点设计</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2025.10-11</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">冰岛东部区都皮沃古尔 Djúpivogur, Austurland, Iceland</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">公共、观景</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">894㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶</p>
+        </div>
+      </div>
+    </div>
+  </div> <!-- 这个 </div> 关闭了上面的 Grid 容器 -->
+</section> <!-- 2. 修复了结构：立刻关闭 Section -->
+<!-- 3. 项目描述 (独立全宽) -->
+<!-- 4. 应用了 max-w-4xl mx-auto 拉通排版 -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>每年8-9月，冰岛赫马岛上都有大量的海鹦幼鸟在出巢后被附近的人工光源吸引，本该循着月光飞向大海的它们散落迷失在城市里。由此，当地居民组建志愿海鹦救援队，在夜间巡逻收集迷路幼鸟，并于次日清晨放归海洋。这似乎是一种善举，但同时也是为自身对自然造成负面影响的一种修正弥补或是救赎。人们应该知道自然本该是怎样。</p>
+  <p>项目选址于冰岛东南沿海的Djúpivogur小镇，设计了一系列连接性的空间系统。其中材料、光线、风、湿度和声音以经过校准的序列递进，将抽象的边界转化为一系列可感知的空间状态。从完全受控的人工环境，到逐渐暴露于自然并受其支配的空间，人工与自然的边界在空间序列中被揭示、模糊并重新诠释。</p>
+  <p>人与自然的分界并非静态的隔离，而是一个连续、可感知且不断变化的界面，让人们以更清晰和谦逊的态度去理解这一边界。</p>
+</div>
+
+
+
+
+
+
+
+
+<!-- ================== CW06 ================== -->
+
+
+
+<section id="AD21" class="scroll-mt-20">
+  <div x-data="{ 
+    images: [ 
+      'AD21-1.jpg', 
+      'AD21-2.jpg', 
+      'AD21-3.jpg', 
+      'AD21-4.jpg'
+    ], 
+    current: 0 
+  }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    
+    <!-- 图片轮播模块 (左侧) -->
+    <div class="lg:col-span-7 relative group aspect-[4/3] overflow-hidden order-1 lg:order-1">
+      <template x-for="(img, index) in images" :key="index">
+        <img 
+          :src="img" 
+          x-show="current === index"
+          x-transition:enter="transition ease-out duration-500"
+          x-transition:enter-start="opacity-0 transform scale-105"
+          x-transition:enter-end="opacity-100 transform scale-100"
+          class="absolute inset-0 w-full h-full object-contain"
+          alt="Project Image"
+        >
+      </template>
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1" 
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" /></svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1" 
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5"><path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" /></svg>
+      </button>
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+
+    <!-- 文字介绍 (右侧) -->
+    <div class="lg:col-span-5 flex flex-col gap-6 order-2 lg:order-2">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">AD21</span>
+        <h2 class="text-3xl font-bold tracking-tight">Journey to the Sea</h2>
+      </div>
+
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">长崎大三东车站改造</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2025.06-09</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">日本长崎大三东 Omisaki, Ngasaki, Japan</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">公共、文化、交通</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">1500㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶</p>
+        </div>
+      </div>
+    </div> <!-- 这个 </div> 关闭了上面的 Grid 容器 -->
+  </div>
+</section> <!-- 2. 修复了结构：立刻关闭 Section -->
+
+<!-- 3. 项目描述 (独立全宽) -->
+<!-- 4. 应用了 max-w-4xl mx-auto 拉通排版 -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>车站不仅是独特的空间形态，更是承载人们相遇与离别、感伤与欣喜等情绪的代名词。在日本长崎大三东，曾作为静谧海边站台与社区隔阂的铁路车站，其稀疏的列车与恒常的潮汐形成对比。本项目旨在将车站重塑为连接日常生活与海岸的通道。居民可穿行于遮荫走廊与共享庭院，商业与社交活动自然延伸至站内；无列车时，站台则化为聚集休憩的舞台，阶梯式观景平台更将视线引向辽阔海面。</p>
+
+  <p>站台下方，图书馆与展览厅嵌于轨道之下，八米高的玻璃幕墙将潮汐涨落尽收眼底。更下方，潮水退去时会浮现出一条滨海步道，邀请人们漫步、驻足、触摸海水。通过社区—车站—海洋这一层层递进的旅程，该项目将隔阂转化为连接，将车站转变为通往自然的门户，以及一个承载记忆、生活与想象的共享之地。</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+<!-- ================== 项目 5: AD22 ================== -->
+<!-- 1. 修复了 class= 语法，并添加 scroll-mt-20 -->
+
+
+
+<section id="AD20" class="scroll-mt-20">
+  <div x-data="{ images: [ 'AD20-1.jpg', 
+                           'AD20-2.jpg', 
+                          'AD20-3.jpg', 
+                          'AD20-4.jpg', 
+                          'AD20-5.jpg', 
+                          'AD20-6.jpg', 
+                          'AD20-7.jpg', 
+                          'AD20-8.jpg' 
+                          ], current: 0 }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    
+    <!-- 图片轮播模块 (左侧) -->
+    <div class="lg:col-span-7 relative group aspect-[4/3] overflow-hidden order-1 lg:order-1">
+      <template x-for="(img, index) in images" :key="index">
+        <img :src="img" x-show="current === index" 
+          x-transition:enter="transition ease-out duration-500" 
+          x-transition:enter-start="opacity-0 transform scale-105" 
+          x-transition:enter-end="opacity-100 transform scale-100" 
+          class="absolute inset-0 w-full h-full object-contain" alt="Project Image">
+      </template>
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1" 
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1" 
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+
+    <!-- 文字介绍 (右侧) -->
+    <div class="lg:col-span-5 flex flex-col gap-6 order-2 lg:order-2">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">AD20</span>
+        <h2 class="text-3xl font-bold tracking-tight">Crossing Bustle 2.0</h2>
+      </div>
+      
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">春森路社区</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2025.03-06</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">中国重庆市渝中区春森路</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">居住、商业</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">25480㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶</p>
+        </div>
+      </div>
+    </div>
+
+  </div> <!-- 这个 </div> 关闭了上面的 Grid 容器 -->
+</section> <!-- 2. 修复了结构：立刻关闭 Section -->
+
+<!-- 3. 项目描述 (独立全宽) -->
+<!-- 4. 应用了 max-w-4xl mx-auto 拉通排版 -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>春森路社区位于中国重庆上清寺片区，是一个典型的高容积率、高密度开发的老旧居住区。长期以来，该社区饱受交通循环不畅、空间封闭、绿化不足、公共空间匮乏等问题困扰。</p>
+  <p>我们通过道路系统和公共商业空间重建邻里连接，提升街道活力、增强视觉通透性、改善夜间照明，消除治安盲区。引入开放式街区理念将有助于填充灰色与消极的城市空间，优化社区环境，实现凝聚、和谐的城市生活。</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+ <!-- ================== AD21 ================== -->
+<!-- 1. 修复了 class= 语法，并添加 scroll-mt-20 -->
+
+
+
+<section id="AD19" class="scroll-mt-20">
+  <div x-data="{ images: [ 'AD19-1.jpg', 
+                           'AD19-2.jpg', 
+                           'AD19-3.jpg', 
+                           'AD19-4.jpg', 
+                           'AD19-5.jpg', 
+                           'AD19-6.jpg', 
+                           'AD19-7.jpg', 
+                           'AD19-8.jpg' 
+                           ], current: 0 }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    <!-- 文字介绍 (左侧) -->
+    <div class="lg:col-span-5 lg:col-start-1 flex flex-col gap-6 order-2 lg:order-1">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">AD19</span>
+        <h2 class="text-3xl font-bold tracking-tight">Childhood in Neighborhood</h2>
+      </div>
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">磁器口幼儿园设计</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2024.10-2025.03</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">中国重庆市沙坪坝区磁器口</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">教育</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">3245㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶</p>
+        </div>
+      </div>
+    </div>
+    <!-- 图片轮播模块 (右侧) -->
+    <div class="lg:col-span-7 lg:col-start-6 relative group aspect-[4/3] overflow-hidden order-1 lg:order-2">
+      <!-- 图片容器 -->
+      <template x-for="(img, index) in images" :key="index">
+        <img :src="img" x-show="current === index" x-transition:enter="transition ease-out duration-500" x-transition:enter-start="opacity-0 transform scale-105" x-transition:enter-end="opacity-100 transform scale-100" class="absolute inset-0 w-full h-full object-contain" alt="Project Image">
+      </template>
+      <!-- 左右翻页按钮 -->
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1" class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1" class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <!-- 图片计数 -->
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+  </div> <!-- 这个 </div> 关闭了上面的 Grid 容器 -->
+</section> <!-- 2. 修复了结构：立刻关闭 Section -->
+<!-- 3. 项目描述 (独立全宽) -->
+<!-- 4. 应用了 max-w-4xl mx-auto 拉通排版 -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>本项目位于重庆磁器口片区，以"非正式学习空间"为核心概念，突破传统功能布局的束缚，通过儿童日常活动创造多元化的学习环境，促进其自主发展。 磁器口住宅建筑前的半公共空间呈现出独特的空间逻辑。居民常以盆栽、家具等界定这些区域，形成半私密空间，儿童在其中嬉戏玩耍，被逐渐培养起社交能力与探索精神。</p>
+  <p>幼儿园的空间设计从磁器口的城市肌理中汲取灵感，运用类型学理论将非正式学习空间融入校园各处。通过提取半公共空间的典型特征——空间尺度、模糊边界与功能复合性——重新诠释走廊、公共休息区、植物温室、微地形及游乐设施等空间。这些空间精心契合儿童发展需求，构建出一个沉浸式的成长乐园，让学习在日常探索中自然发生。</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- ==================  AD20 ================== -->
+<!-- 1. 修复了 class= 语法，并添加 scroll-mt-20 -->
+
+
+
+<section id="AD18" class="scroll-mt-20">
+  <div x-data="{ images: [ 'AD18-1.jpg','AD18-2.jpg','AD18-3.jpg','AD18-4.jpg' ], current: 0 }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    <!-- 文字介绍 (左侧) -->
+    <div class="lg:col-span-5 lg:col-start-1 flex flex-col gap-6 order-2 lg:order-1">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">AD18</span>
+        <h2 class="text-3xl font-bold tracking-tight">Corridor Pavilion 回廊亭</h2>
+      </div>
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">土湾社区咖啡店</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2025.06</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">中国重庆市沙坪坝区土湾社区</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">商业、公共</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">92㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶，詹桑绮</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图片轮播模块 (右侧) -->
+    <div class="lg:col-span-7 lg:col-start-6 relative group aspect-[4/3] overflow-hidden order-1 lg:order-2">
+      <!-- 图片容器 -->
+      <template x-for="(img, index) in images" :key="index">
+        <img :src="img" x-show="current === index"
+          x-transition:enter="transition ease-out duration-500"
+          x-transition:enter-start="opacity-0 transform scale-105"
+          x-transition:enter-end="opacity-100 transform scale-100"
+          class="absolute inset-0 w-full h-full object-contain" alt="Project Image">
+      </template>
+      <!-- 左右翻页按钮 -->
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1"
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1"
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <!-- 图片计数 -->
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+  </div> <!-- 这个 </div> 关闭了上面的 Grid 容器 -->
+</section> <!-- 2. 修复了结构：立刻关闭 Section -->
+
+<!-- 3. 设计说明 (独立全宽) -->
+<!-- 4. 应用了 max-w-4xl mx-auto 拉通排版 -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>项目位于重庆土湾社区人流密集的三岔路口，原本是一片无人使用的野生草地。我们以1.2米为模数在此搭建一个轻盈的回廊亭，用高透阳光板开启扇对局部空间进行围合，以适应不同季节的运营需求。</p>
+  <p>建筑之外，不同的外摆家具散落在草地景观之间，人们在此下棋、喝茶、咖啡或是纳凉。街道办也可在此定期组织观影活动，丰富居民的社区生活。</p>
+</div>
+
+
+
+
+
+
+
+
+
+
+<!-- ================== AD19 ================== -->
+<!-- 1. 修复了 class= 语法，并添加 scroll-mt-20 -->
+
+
+
+<!-- ================== AD17 ================== -->
+<!-- 1. 修复了 class= 语法，并添加 scroll-mt-20 -->
+<section id="AD17" class="scroll-mt-20">
+  <div x-data="{ images: [ 'AD17-1.png', 
+                           'AD17-2.jpg', 
+                          'AD17-3.png', 
+                          'AD17-4.png', 
+                          'AD17-5.jpg',
+                          'AD17-6.png'
+                          ], current: 0 }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    
+    <!-- 图片轮播模块 (左侧) -->
+    <div class="lg:col-span-7 relative group aspect-[4/3] overflow-hidden order-1 lg:order-1">
+      <template x-for="(img, index) in images" :key="index">
+        <img :src="img" x-show="current === index" 
+          x-transition:enter="transition ease-out duration-500" 
+          x-transition:enter-start="opacity-0 transform scale-105" 
+          x-transition:enter-end="opacity-100 transform scale-100" 
+          class="absolute inset-0 w-full h-full object-contain" alt="Project Image">
+      </template>
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1" 
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1" 
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+
+    <!-- 文字介绍 (右侧) -->
+    <div class="lg:col-span-5 flex flex-col gap-6 order-2 lg:order-2">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">AD17</span>
+        <h2 class="text-3xl font-bold tracking-tight">CONNECTION</h2>
+      </div>
+      
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">鸽牌电缆厂地块城市设计</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2025.04-06</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">中国重庆市沙坪坝区鸽牌电缆厂地块</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">办公、居住、商业、文化</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">182000㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">规划用地面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2640000㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶，魏毅诚，刘桐昊</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 3. 项目描述 (独立全宽) -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>项目场地位于重庆市沙坪坝区滨江区域，场地内高差较大，高家花园大桥与轨道大桥穿过场地。场地的核心问题为确实文化的断联， 场地西北邻千年古镇磁器口，东南邻高等学府重庆大学。因此项目旨在形成连续的文化空间，并为未来的青年创意从业者的生活模式提出构想，将各个主题的功能区域通过"塔群与廊桥"进行交通和文化两重意义上的连接，六座主题塔分别承载学术、创意与传统工艺等等，通过天际廊道将高等学府与磁器口古镇无缝衔接。廊桥沿线设计半开放节点，配备可移动展示与互动装置，为匠人与师生提供工作坊、展演与沙龙空间。场地中心的自来水厂改造为艺术馆与运动场所，形成新的场地的核心，通过屋顶架空的跑道将所有塔的廊道进行整合，强调场地的公共性和中心性</p>
+</div>
+
+
+
+<!-- ================== AD16 ================== -->
+<section id="AD16" class="scroll-mt-20">
+  <div x-data="{ images: [ 'AD16-1.jpg', 
+                           'AD16-2.jpg', 
+                          'AD16-3.jpg', 
+                          'AD16-4.jpg', 
+                          'AD16-5.jpg', 
+                          'AD16-6.jpg', 
+                          'AD16-7.jpg', 
+                          'AD16-8.jpg', 
+                          'AD16-9.jpg', 
+                          'AD16-10.jpg', 
+                          'AD16-11.jpg' 
+                          ], current: 0 }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    
+    <!-- 图片轮播模块 (左侧) -->
+    <div class="lg:col-span-7 relative group aspect-[4/3] overflow-hidden order-1 lg:order-1">
+      <template x-for="(img, index) in images" :key="index">
+        <img :src="img" x-show="current === index" 
+          x-transition:enter="transition ease-out duration-500" 
+          x-transition:enter-start="opacity-0 transform scale-105" 
+          x-transition:enter-end="opacity-100 transform scale-100" 
+          class="absolute inset-0 w-full h-full object-contain" alt="Project Image">
+      </template>
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1" 
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1" 
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+
+    <!-- 文字介绍 (右侧) -->
+    <div class="lg:col-span-5 flex flex-col gap-6 order-2 lg:order-2">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">AD16</span>
+        <h2 class="text-3xl font-bold tracking-tight">Tranquil Vitality 平热日常</h2>
+      </div>
+      
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">重庆大学虎溪学生活动中心</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2025.02-04</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">中国重庆市沙坪坝区重庆大学D区</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">公共、文化、办公</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">11900㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶，陈群颖，魏毅诚</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 3. 项目描述 (独立全宽) -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>项目位于重庆大学虎溪校区，包含校园剧院和学生活动中心。设计尊重现有场地，通过运用柱廊和实体体量营造出宁静沉稳的氛围。同时，开放的流通路径和半透明的界面保持了日常校园生活的活力。该建筑不仅是功能空间，也是文化和社会交流的重要枢纽。</p>
+  <p>该场地位于校园的重要节点。建筑后退形成草坪广场，供学生聚集和休憩。建筑由三个功能不同的体块组成， 高度依次降低以呼应其后的小山丘。这些体块通过层层叠叠的板状屋顶相连，形成和谐的视觉联系。剧院的内部设计经过了精心且全面的考量。主剧场设有 1200 个座位，其中900 个位于正厅，300 个位于楼座，而较小的剧场则可容纳 500 个座位。</p>
+</div>
+
+
+
+<!-- ================== CW05 ================== -->
+<section id="CW05" class="scroll-mt-20">
+  <div x-data="{ images: [ 'CW05-1.jpg', 
+                           'CW05-2.jpg', 
+                           'CW05-3.jpg', 
+                           'CW05-4.jpg', 
+                           'CW05-5.jpg', 
+                           'CW05-6.jpg', 
+                           'CW05-7.jpg', 
+                           'CW05-8.jpg', 
+                           'CW05-9.jpg', 
+                           'CW05-10.png' 
+                          ], current: 0 }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    
+    <!-- 图片轮播模块 (左侧) -->
+    <div class="lg:col-span-7 relative group aspect-[4/3] overflow-hidden order-1 lg:order-1">
+      <template x-for="(img, index) in images" :key="index">
+        <img :src="img" x-show="current === index" 
+          x-transition:enter="transition ease-out duration-500" 
+          x-transition:enter-start="opacity-0 transform scale-105" 
+          x-transition:enter-end="opacity-100 transform scale-100" 
+          class="absolute inset-0 w-full h-full object-contain" alt="Project Image">
+      </template>
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1" 
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1" 
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+
+    <!-- 文字介绍 (右侧) -->
+    <div class="lg:col-span-5 flex flex-col gap-6 order-2 lg:order-2">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">CW05</span>
+        <h2 class="text-3xl font-bold tracking-tight">Bylake</h2>
+      </div>
+      
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">成都骑龙公园竞赛 书店 / 驿站</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2024.12</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">成都高新区骑龙公园</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">公共</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">745㎡（书店）+225㎡（驿站）</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶，郭裕炀，刘昱辰，侯竹筠，李思瑾，吕璐瑶</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- CW05 项目描述 -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>书店选址在湖畔水陆之间，与美丽的湖景有着紧密的联系。我们想象建筑是一个兼具公共性与私密性的观景器，嵌在岸边的泥土里。人们通过这座建筑能以多种方式与湖水产生五感的互动。它不仅仅是一个书店，更是骑龙公园的中心。</p>
+  <p>功能上，由两层主要的阅读空间、一个沙龙空间、一个小的水吧休息空间以及配套的下沉庭院和亲水平台组成，并配有一个独立的卫生间。依据每个空间功能需求的不同，来设定空间和环境的具体的关系。我们首先将场地地坪整体下挖了1.5米，在西侧入口处形成一个公共的下沉院落，同时将首层界面往陆地方向退让，让湖水延伸进屋檐下，模糊建筑与自然的边界。</p>
+  <p>在一层，两侧的片墙将人们的视线引向湖面，所有人都可以安静地坐在落地窗前阅读，室外的人们也可以通过透明的空间间接观赏到湖景。这一层主要承担了书店的陈列与零售的功能。二层的空间则显得更为安静私密，以阅读和自习为主。倾斜的屋顶向湖水压低，长窗的位置恰好匹配人们坐下后视线的高度，提供一个专属的观湖窗口。而另一侧的墙面仅在上部设置了高窗，以遮挡强烈的西晒。</p>
+  <p>沙龙空间位于二层的北端。锯齿屋顶提供了较为均质的明亮光线，更有利于如讲座、签售会这样的小型活动的开展。楼下的水吧和亲水平台与西侧的下沉庭院互相交织，共同构成了这个公园最核心的社交场所。鸟语花香、绿树成荫，人们在树影斑驳的院子里悠闲地品茶、聊天，享受轻松的休闲时光。这其实是成都人习以为常的安逸生活方式。我们认为在都市的新兴地带，传统的城市文化与场所精神也应该被有效继承延续。而此类社交场景设计，则完美呼应了这一生活传统。</p>
+  <p>另一座建筑则是露营地旁的公园驿站。我们将地块用4m×4m的均质柱网划分，在其中置入公共卫生间和服务于露营场地的充电站与便利店，并退让出朝南的部分形成开放的灰空间。网格化的布局让每个功能区域都有明确的界定，便于运营管理和日常使用。</p>
+  <p>此外，模块化装配式的木结构在建造过程中起到降本增效的作用。全过程干作业也展现出最大程度的环境友好。</p>
+</div>
+
+
+
+<!-- ================== AD15 ================== -->
+<section id="AD15" class="scroll-mt-20">
+  <div x-data="{ images: [ 'AD15-1.jpg', 
+                           'AD15-2.jpg', 
+                          'AD15-3.jpg', 
+                          'AD15-4.jpg', 
+                          'AD15-5.jpg', 
+                          'AD15-6.jpg', 
+                          'AD15-7.jpg', 
+                          'AD15-8.jpg' 
+                          ], current: 0 }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    
+    <!-- 图片轮播模块 (左侧) -->
+    <div class="lg:col-span-7 relative group aspect-[4/3] overflow-hidden order-1 lg:order-1">
+      <template x-for="(img, index) in images" :key="index">
+        <img :src="img" x-show="current === index" 
+          x-transition:enter="transition ease-out duration-500" 
+          x-transition:enter-start="opacity-0 transform scale-105" 
+          x-transition:enter-end="opacity-100 transform scale-100" 
+          class="absolute inset-0 w-full h-full object-contain" alt="Project Image">
+      </template>
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1" 
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1" 
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+
+    <!-- 文字介绍 (右侧) -->
+    <div class="lg:col-span-5 flex flex-col gap-6 order-2 lg:order-2">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">AD15</span>
+        <h2 class="text-3xl font-bold tracking-tight">BREATH</h2>
+      </div>
+      
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">铜元局超高层办公项目</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2024.11-12</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">中国重庆市南岸区铜元局</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">办公、商业</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目面积</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">89651㎡</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">建筑高度</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">145m</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶，魏毅诚</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 3. 项目描述 (独立全宽) -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>项目位于重庆铜元局的临江地块上，旨在为该地区提供一个富有活力的区域中心，包含企业孵化办公、艺术非标商业以及商务酒店配套。场地东南侧的电厂宿舍旧址与西北侧的路口连接形成了一条热点轴线，而与之垂直的恰好是指向渝中半岛的城市景观轴线。由此，建筑被扭转了51度，并在底部形成了丰富的街巷商业空间、露台，以及一个大型的集会广场。这为周围社区的人们提供了曾经缺失的生活目的地。</p>
+  <p>塔楼被置于地块东北角，以保证其良好的景观视野，以及底部商业的光照。在这一环节，我们希望尽可能地创造宜人的办公环境与工作氛围。塔楼高145米，设有高低两个避难层。在其下一层，我们设置了公共活动的楼层，以及几个室外露台。但相对集中化的休憩空间对于多数上班的人们而言并没有太多的日常适用性。因此，在这两层公区楼层外，办公区域的每一层都拥有两个大阳台，以供人们放松、交谈、吸烟或是独处。</p>
+</div>
+
+
+
+<!-- ================== AD13 ================== -->
+<section id="AD13" class="scroll-mt-20">
+  <div x-data="{ 
+    images: [ 
+      'AD13-1.jpg', 
+      'AD13-2.jpg', 
+      'AD13-3.jpg', 
+      'AD13-4.jpg', 
+      'AD13-5.jpg', 
+      'AD13-6.jpg', 
+      'AD13-7.jpg', 
+      'AD13-8.jpg', 
+      'AD13-9.jpg', 
+      'AD13-10.jpg', 
+      'AD13-11.jpg'
+    ], 
+    current: 0 
+  }" class="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
+    
+    <!-- 文字介绍 (左侧) -->
+    <div class="lg:col-span-5 flex flex-col gap-6 order-2 lg:order-1">
+      <div class="flex items-baseline gap-4 border-b border-gray-200 pb-2">
+        <span class="text-xs font-mono text-gray-500">AD13</span>
+        <h2 class="text-3xl font-bold tracking-tight">How Silos Encore ?</h2>
+      </div>
+
+      <!-- 项目概览信息 -->
+      <div class="space-y-3 border-b border-gray-200 pb-8 mb-8">
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目名称</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">四川遂宁混凝土搅拌站商业改造</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计时间</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">2024.04-06</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">项目地点</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">中国四川省遂宁市</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between border-b border-gray-100 py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">功能类型</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">商业</p>
+        </div>
+        <div class="flex flex-col md:flex-row md:justify-between py-1">
+          <p class="text-xs text-gray-400 font-semibold tracking-widest md:w-1/5">设计人员</p>
+          <p class="text-base text-gray-800 font-medium mt-1 md:mt-0 md:w-4/5 text-right md:text-left">梁凯轶，魏毅诚</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- 图片轮播模块 (右侧) -->
+    <div class="lg:col-span-7 lg:col-start-6 relative group aspect-[4/3] overflow-hidden order-1 lg:order-2">
+      <template x-for="(img, index) in images" :key="index">
+        <img :src="img" x-show="current === index" 
+          x-transition:enter="transition ease-out duration-500" 
+          x-transition:enter-start="opacity-0 transform scale-105" 
+          x-transition:enter-end="opacity-100 transform scale-100" 
+          class="absolute inset-0 w-full h-full object-contain" alt="Project Image">
+      </template>
+      <button @click="current = (current === 0) ? images.length - 1 : current - 1" 
+        class="absolute left-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+        </svg>
+      </button>
+      <button @click="current = (current === images.length - 1) ? 0 : current + 1" 
+        class="absolute right-4 top-1/2 -translate-y-1/2 w-10 h-10 bg-white/90 hover:bg-white text-black rounded-full flex items-center justify-center shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110 z-10">
+        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
+      </button>
+      <div class="absolute bottom-4 right-4 px-3 py-1 bg-black/70 text-white text-xs rounded-full backdrop-blur-sm">
+        <span x-text="current + 1"></span> / <span x-text="images.length"></span>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- 3. 项目描述 (独立全宽) -->
+<div class="max-w-3xl mx-auto mt-12 prose prose-sm text-gray-600 leading-relaxed">
+  <p>四川遂宁西北侧的城郊山坡上，有一座已荒废的、由三层台地组成的混凝土搅拌站。</p>
+  <p>设计保留了搅拌站完整的工业构筑形态，利用高差形成层叠的空间结构。方案将底层改造为商业餐饮区，中层设置展演空间与共享办公，顶层保留原料储备的功能并设置为开放的观景平台。</p>
+  <p>设计通过置入一系列新的功能体块，在保留历史构筑物的基础上，创造新的城市活力。</p>
+</div>
+
+</main>
+
+<!-- 关闭 min-w-[1280px] 容器 -->
+</div>
+
+<!-- 侧边目录导航 (右侧固定居中版 - 带滚动监听) -->
+<div x-data="{
+  sections: ['hero', 'AD23', 'CW06', 'AD22', 'AD21', 'AD20', 'AD19', 'AD18', 'AD17', 'AD16', 'CW05', 'AD15', 'AD13'],
+  current: 'hero',
+  ratios: {},
+  init() {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        this.ratios[entry.target.id] = entry.intersectionRatio;
+      });
+      // 找到占比最大的 section
+      let maxRatio = 0;
+      let maxId = 'hero';
+      this.sections.forEach(id => {
+        if (this.ratios[id] && this.ratios[id] > maxRatio) {
+          maxRatio = this.ratios[id];
+          maxId = id;
+        }
+      });
+      this.current = maxId;
+    }, { threshold: [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7, 0.8, 0.9, 1] });
+    
+    this.sections.forEach(id => {
+      const el = document.getElementById(id);
+      if (el) observer.observe(el);
+    });
+  },
+  goTo(id) {
+    if (id === 'hero') {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+      return;
+    }
+    const el = document.getElementById(id);
+    if (el) {
+      el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+  }
+}" class="fixed right-60 top-1/2 -translate-y-1/2 z-50 flex flex-col items-end space-y-6" style="pointer-events: none;">
+
+  <!-- 导航项：个人简介 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'hero' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('hero')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'hero' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>ABOUT</div>
+      <div>个人简介</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'hero' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：AD23 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD23' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD23')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD23' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>AD23</div>
+      <div>In Their Eyes</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD23' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：CW06 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'CW06' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('CW06')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'CW06' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>CW06</div>
+      <div>山海の間</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'CW06' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：AD22 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD22' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD22')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD22' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>AD22</div>
+      <div>City Ends, Nature Begins.</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD22' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：AD21 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD21' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD21')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD21' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>AD21</div>
+      <div>Journey to the Sea</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD21' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：AD20 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD20' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD20')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD20' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>AD20</div>
+      <div>Crossing Bustle 2.0</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD20' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：AD19 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD19' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD19')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD19' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>AD19</div>
+      <div>Childhood in Neighborhood</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD19' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：AD18 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD18' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD18')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD18' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>AD18</div>
+      <div>Corridor Pavilion 回廊亭</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD18' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：AD17 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD17' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD17')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD17' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>AD17</div>
+      <div>CONNECTION</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD17' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：AD16 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD16' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD16')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD16' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>AD16</div>
+      <div>Tranquil Vitality 平热日常</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD16' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：CW05 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'CW05' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('CW05')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'CW05' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>CW05</div>
+      <div>Bylake</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'CW05' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：AD15 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD15' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD15')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD15' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>AD15</div>
+      <div>BREATH</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD15' ? 'scale-130' : ''"></div>
+  </div>
+
+  <!-- 导航项：AD13 -->
+  <div class="flex items-center relative pointer-events-auto cursor-pointer transition-all duration-300" :class="current === 'AD13' ? 'scale-130' : 'opacity-30 hover:opacity-100'" @click="goTo('AD13')">
+    <div class="text-right text-[10px] font-mono mr-3 whitespace-nowrap transition-colors duration-300" :class="current === 'AD13' ? 'text-black' : 'text-gray-500'" style="font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;">
+      <div>AD13</div>
+      <div>How Silos Encore?</div>
+    </div>
+    <div class="w-2 h-2 bg-black rounded-full shadow-md transition-transform duration-300" :class="current === 'AD13' ? 'scale-130' : ''"></div>
+  </div>
+
+</div>
+
+    <!-- ================== 页脚代码开始 ================== -->
+    <footer class="bg-[#f4f4f4] border-t border-gray-200 mt-20">
+      <div class="max-w-6xl mx-auto px-6 py-16">
+        <!-- 版权信息 -->
+        <p class="text-xs text-gray-500 tracking-wide mb-8">
+          &copy; 2026 Kaye Liang. All Rights Reserved.
+        </p>
+        <!-- 三个按钮：同一排、等宽等高 -->
+        <div class="flex flex-col sm:flex-row gap-3">
+          <a href="mailto:liangkaye@163.com" class="flex-1 inline-flex items-center justify-center gap-2 px-4 h-12 bg-black text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <rect x="2" y="4" width="20" height="16" rx="2"/>
+              <path d="M2 7l10 7 10-7"/>
+            </svg>
+            Email
+          </a>
+          <a href="https://xhslink.com/m/4aEunfE1aZe" target="_blank" class="flex-1 inline-flex items-center justify-center gap-2 px-4 h-12 bg-[#FE2C55] text-white text-sm font-medium rounded-lg hover:bg-[#E0244A] transition-colors">
+            <img src="XiaohongshuLOGO.png" alt="小红书" class="w-5 h-5 rounded-sm">
+            RedNote-Architecture
+          </a>
+          <a href="https://xhslink.com/m/8U4zrf2Yltw" target="_blank" class="flex-1 inline-flex items-center justify-center gap-2 px-4 h-12 bg-[#FE2C55] text-white text-sm font-medium rounded-lg hover:bg-[#E0244A] transition-colors">
+            <img src="XiaohongshuLOGO.png" alt="小红书" class="w-5 h-5 rounded-sm">
+            RedNote-Photography
+          </a>
+        </div>
+      </div>
+    </footer>
+    <!-- ================== 页脚代码结束 ================== -->
+
+</body>
+</html>
+<!-- 1. 修复了 class= 语法，并添加 scroll-mt-20 -->
+
+
+
